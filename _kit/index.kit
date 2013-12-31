@@ -66,11 +66,11 @@
 
 					<p>Turn anchor links into Smooth Scroll links by adding the <code>.scroll</code> class. Give the anchor location an ID just like you normally would.</p>
 
-<pre><code class="language-markup">&lt;a class="scroll" data-speed="500" data-easing="easeInOutCubic" href="#bazinga"&gt;Anchor Link&lt;/a&gt;
+<pre><code class="language-markup">&lt;a class="scroll" data-speed="500" data-easing="easeInOutCubic" data-url="false" href="#bazinga"&gt;Anchor Link&lt;/a&gt;
 ...
 &lt;span id="bazinga"&gt;Bazinga!&lt;/span&gt;</code></pre>
 
-					<p class="text-small text-muted"><span class="label">New</span> Use optional <code>data-speed</code> and <code>data-easing</code> attributes to control the speed and easing of your animations. If you don't specify, Smooth Scroll defaults to 500 milliseconds and <code>easeInOutCubic</code> easing.</p>
+					<p class="text-small text-muted"><span class="label">New</span> Use the optional <code>data-url</code> attribute to upate the URL with an anchor link. It accepts <code>true</code> and <code>false</code> values, and defaults to <code>false</code> if you don't specify. Use optional <code>data-speed</code> and <code>data-easing</code> attributes to control the speed and easing of your animations. If you don't specify, Smooth Scroll defaults to 500 milliseconds and <code>easeInOutCubic</code> easing.</p>
 
 					<section class="hero hero-condensed">
 						<h3 class="no-space">Easing Options</h3>
