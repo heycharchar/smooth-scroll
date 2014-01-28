@@ -28,7 +28,7 @@
 						<span class="text-small">
 							<a href="https://github.com/cferdinandi/smooth-scroll"><i class="icon-github"></i> GitHub Project</a>
 							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a class="scroll" href="#get-started"><i class="icon-docs"></i> Getting Started</a>
+							<a data-scroll href="#get-started"><i class="icon-docs"></i> Getting Started</a>
 						</span>
 					</p>
 
@@ -45,13 +45,13 @@
 
 					<p>Smooth Scroll is a lightweight script for animating the scrolling of anchor links. It includes multiple easing options for smoother animations.</p>
 
-					<p><a class="scroll" data-speed="1000" href="#bazinga">Anchor Link</a></p>
+					<p><a data-scroll data-speed="1000" href="#bazinga">Anchor Link</a></p>
 
 					<p>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.</p>
 
 					<p id="bazinga">Bazinga!</p>
 
-					<p><a class="scroll" data-easing="easeOutQuad" href="#top">Scroll to the top</a></p>
+					<p><a data-scroll data-easing="easeOutQuad" href="#top">Scroll to the top</a></p>
 
 					<hr>
 
@@ -81,7 +81,7 @@
 
 					<p>Turn anchor links into Smooth Scroll links by adding the <code>.scroll</code> class. Give the anchor location an ID just like you normally would.</p>
 
-<pre><code class="language-markup">&lt;a class="scroll" data-speed="500" data-easing="easeInOutCubic" data-url="false" href="#bazinga"&gt;Anchor Link&lt;/a&gt;
+<pre><code class="language-markup">&lt;a data-scroll data-speed="500" data-easing="easeInOutCubic" data-url="false" href="#bazinga"&gt;Anchor Link&lt;/a&gt;
 ...
 &lt;span id="bazinga"&gt;Bazinga!&lt;/span&gt;</code></pre>
 
