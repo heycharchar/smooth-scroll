@@ -1,6 +1,6 @@
 /* =============================================================
 
-	Smooth Scroll 2.8
+	Smooth Scroll 3.0
 	Animate scrolling to anchor links, by Chris Ferdinandi.
 	http://gomakethings.com
 
@@ -10,22 +10,50 @@
 	Easing functions forked from Gaëtan Renaudeau.
 	https://gist.github.com/gre/1650294
 
+	URL history support contributed by Robert Pate.
+	https://github.com/robertpateii
+
+	Fixed header support contributed by Arndt von Lucadou.
+	https://github.com/a-v-l
+
 	Free to use under the MIT License.
 	http://gomakethings.com/mit/
 
  * ============================================================= */
 
-(function() {
+window.smoothScroll = (function (window, document, undefined) {
 
 	'use strict';
 
 	// Feature Test
 	if ( 'querySelector' in document && 'addEventListener' in window && Array.prototype.forEach ) {
 
-		// Function to animate the scroll
-		var smoothScroll = function (anchor, duration, easing) {
+		// SELECTORS
 
-			// Functions to control easing
+		var scrollToggles = document.querySelectorAll('[data-scroll]');
+
+
+		// METHODS
+
+		// Run the smooth scroll animation
+		var runSmoothScroll = function (anchor, duration, easing, url) {
+
+			// SELECTORS
+
+			var startLocation = window.pageYOffset;
+
+			// Get the height of a fixed header if one exists
+			var scrollHeader = document.querySelector('[data-scroll-header]');
+			var headerHeight = scrollHeader === null ? 0 : scrollHeader.offsetHeight;
+
+			// Set the animation variables to 0/undefined.
+			var timeLapsed = 0;
+			var percentage, position;
+
+
+			// METHODS
+
+			// Calculate the easing pattern
 			var easingPattern = function (type, time) {
 				if ( type == 'easeInQuad' ) return time * time; // accelerating from zero velocity
 				if ( type == 'easeOutQuad' ) return time * (2 - time); // decelerating to zero velocity
@@ -42,23 +70,39 @@
 				return time; // no easing, no acceleration
 			};
 
-			// Calculate how far and how fast to scroll
-			// http://www.quirksmode.org/blog/archives/2008/01/using_the_assig.html
-			var startLocation = window.pageYOffset;
-			var endLocation = function (anchor) {
-				var distance = 0;
+			// Update the URL
+			var updateURL = function (url, anchor) {
+				if ( url === 'true' && history.pushState ) {
+					history.pushState( {pos:anchor.id}, '', '#' + anchor.id );
+				}
+			};
+
+			// Calculate how far to scroll
+			var getEndLocation = function (anchor) {
+				var location = 0;
 				if (anchor.offsetParent) {
 					do {
-						distance += anchor.offsetTop;
+						location += anchor.offsetTop;
 						anchor = anchor.offsetParent;
 					} while (anchor);
 				}
-				return distance;
+				location = location - headerHeight;
+				if ( location >= 0 ) {
+					return location;
+				} else {
+					return 0;
+				}
 			};
-			var distance = endLocation(anchor) - startLocation;
-			var increments = distance / (duration / 16);
-			var timeLapsed = 0;
-			var percentage, position, stopAnimation;
+			var endLocation = getEndLocation(anchor);
+			var distance = endLocation - startLocation;
+
+			// Stop the scrolling animation when the anchor is reached (or at the top/bottom of the page)
+			var stopAnimation = function () {
+				var currentLocation = window.pageYOffset;
+				if ( currentLocation == endLocation || ( (window.innerHeight + currentLocation) >= document.body.scrollHeight ) ) {
+					clearInterval(runAnimation);
+				}
+			};
 
 			// Scroll the page by an increment, and check if it's time to stop
 			var animateScroll = function () {
@@ -66,60 +110,56 @@
 				percentage = ( timeLapsed / duration );
 				percentage = ( percentage > 1 ) ? 1 : percentage;
 				position = startLocation + ( distance * easingPattern(easing, percentage) );
-				window.scrollTo(0, position);
+				window.scrollTo( 0, position );
 				stopAnimation();
 			};
 
-			// Stop the animation
-			if ( increments >= 0 ) { // If scrolling down
-				// Stop animation when you reach the anchor OR the bottom of the page
-				stopAnimation = function () {
-					var travelled = window.pageYOffset;
-					if ( (travelled >= (endLocation(anchor) - increments)) || ((window.innerHeight + travelled) >= document.body.offsetHeight) ) {
-						clearInterval(runAnimation);
-					}
-				};
-			} else { // If scrolling up
-				// Stop animation when you reach the anchor OR the top of the page
-				stopAnimation = function () {
-					var travelled = window.pageYOffset;
-					if ( travelled <= (endLocation(anchor) || 0) ) {
-						clearInterval(runAnimation);
-					}
-				};
-			}
 
-			// Loop the animation function
+			// EVENTS, LISTENERS, AND INITS
+
+			updateURL(url, anchor);
 			var runAnimation = setInterval(animateScroll, 16);
 
 		};
 
-		// For each smooth scroll link
-		var scrollToggle = document.querySelectorAll('.scroll');
-		[].forEach.call(scrollToggle, function (toggle) {
+		// Check that anchor exists and run scroll animation
+		var handleToggleClick = function (event) {
 
-			// When the smooth scroll link is clicked
-			toggle.addEventListener('click', function(e) {
+			// SELECTORS
 
-				// Prevent the default link behavior
-				e.preventDefault();
+			// Get anchor link and calculate distance from the top
+			var dataID = this.getAttribute('href');
+			var dataTarget = document.querySelector(dataID);
+			var dataSpeed = this.getAttribute('data-speed');
+			var dataEasing = this.getAttribute('data-easing');
+			var dataURL = this.getAttribute('data-url');
 
-				// Get anchor link and calculate distance from the top
-				var dataID = toggle.getAttribute('href');
-				var dataTarget = document.querySelector(dataID);
-				var dataSpeed = toggle.getAttribute('data-speed');
-				var dataEasing = toggle.getAttribute('data-easing'); // WL: Added easing attribute support.
 
-				// If the anchor exists
-				if (dataTarget) {
-					// Scroll to the anchor
-					smoothScroll(dataTarget, dataSpeed || 500, dataEasing || 'easeInOutCubic');
-				}
+			// EVENTS, LISTENERS, AND INITS
 
-			}, false);
+			event.preventDefault();
+			if (dataTarget) {
+				runSmoothScroll( dataTarget, dataSpeed || 500, dataEasing || 'easeInOutCubic', dataURL || 'false' );
+			}
 
-		});
+		};
+
+
+		// EVENTS, LISTENERS, AND INITS
+
+		// When a toggle is clicked, run the click handler
+		for (var i = scrollToggles.length; i--;) {
+			var toggle = scrollToggles[i];
+			toggle.addEventListener('click', handleToggleClick, false);
+		}
+
+		// Return to the top of the page when back button is clicked and no hash is set
+		window.onpopstate = function (event) {
+			if ( event.state === null && window.location.hash === '' ) {
+				window.scrollTo( 0, 0 );
+			}
+		};
 
 	}
 
-})();
+})(window, document);
